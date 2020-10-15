@@ -3,7 +3,7 @@ import socket
 import threading
 
 #This function will be run for every client that connects
-def for_each_client(sock, conn, dictionary):
+def for_each_client(sock, conn, web_directory):
 	reply = b'none'
 	reply = conn.recv(4096)
 	reply_raw = str(reply)[2:-1]
@@ -16,7 +16,7 @@ def for_each_client(sock, conn, dictionary):
 		print(requests[i + 1])
 
 	try:
-		file = open("./www" + reply_parsed[1], "r")
+		file = open(web_directory + reply_parsed[1], "r")
 		conn.send(reply_parsed[2].encode() + b"200" + b"OK")
 		conn.send(b"\r\n")
 		conn.send(file.read().encode())
@@ -29,17 +29,20 @@ def for_each_client(sock, conn, dictionary):
 	conn.close()
 	print('Client Disconnected')
 
-#This will hold all the dictionary definitions
-dictionary = {
-	b'GET cat': "ANSWER An animal with ears",
-	b'GET lizard': "ANSWER An animal without ears"
-}
+#Read Configuration from config.txt
+cfgFile = open("config.txt", "r")
+cfg = cfgFile.read()
+cfg_parsed = cfg.split("\n")
+print(cfg_parsed)
+host = cfg_parsed[0].split(" ")[1]
+port = cfg_parsed[1].split(" ")[1]
+web_directory = cfg_parsed[2].split(" ")[1]
 
 #This block of code handles the new clients and passes control to for_each_client()
-sock = socket.create_server(('192.168.0.16', 6789))
+sock = socket.create_server((host, int(port)))
 while(1):
 	sock.listen(10)
 	conn = sock.accept()[0]
 	print('Client Connected')
-	new_thread = threading.Thread(None, for_each_client, None, (sock, conn, dictionary))
+	new_thread = threading.Thread(None, for_each_client, None, (sock, conn, web_directory))
 	new_thread.start()
