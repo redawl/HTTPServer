@@ -16,10 +16,12 @@ def for_each_client(sock, conn, web_directory):
 		print(requests[i + 1])
 
 	try:
-		file = open(web_directory + reply_parsed[1], "r")
+		if(reply_parsed[1] != "/"):
+			file = open(web_directory + reply_parsed[1], "r")
 		conn.send(reply_parsed[2].encode() + b"200" + b"OK")
 		conn.send(b"\r\n")
-		conn.send(file.read().encode())
+		if(replay_parsed[1] != "/"):
+			conn.send(file.read().encode())
 	except:
 		print('Requested File Not Found')
 		conn.send(reply_parsed[2].encode() + b"404" + b"Not Found")
