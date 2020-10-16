@@ -17,14 +17,15 @@ def for_each_client(sock, conn, web_directory):
 
 	try:
 		if(reply_parsed[1] != "/"):
+			print(web_directory + reply_parsed[1])
 			file = open(web_directory + reply_parsed[1], "r")
-		conn.send(reply_parsed[2].encode() + b"200" + b"OK")
+		conn.send(reply_parsed[2].encode() + b" 200 " + b"OK")
 		conn.send(b"\r\n")
-		if(replay_parsed[1] != "/"):
+		if(reply_parsed[1] != "/"):
 			conn.send(file.read().encode())
-	except:
+	except IOError:
 		print('Requested File Not Found')
-		conn.send(reply_parsed[2].encode() + b"404" + b"Not Found")
+		conn.send(reply_parsed[2].encode() + b" 404 " + b"Not Found")
 		conn.send(b"\r\n")
 		conn.send(b"Sorry we don't have that file!")
 
