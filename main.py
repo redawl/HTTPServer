@@ -2,6 +2,16 @@
 import socket
 import threading
 
+def get_file_type(file):
+	ret = "text"
+	extension = file.split(".")[1]
+	if(extension == "html"):
+		ret = "text/html; charset=UTF-8"
+	elif(extension == "ico"):
+		ret = "image/x-icon"
+
+	return ret
+
 #This function will be run for every client that connects
 def for_each_client(sock, conn, web_directory):
 	reply = b'none'
@@ -18,11 +28,15 @@ def for_each_client(sock, conn, web_directory):
 	try:
 		if(reply_parsed[1] != "/"):
 			print(web_directory + reply_parsed[1])
-			file = open(web_directory + reply_parsed[1], "r")
-		conn.send(reply_parsed[2].encode() + b" 200 " + b"OK")
+		else:
+			reply_parsed[1] = "/index.html"
+
+		file = open(web_directory + reply_parsed[1], "r")
+		extension = get_file_type(reply_parsed[1])
+		conn.send(reply_parsed[2].encode() + b" 200 " + b"OK\r\n")
+		conn.send(b"Content-Type: " + extension.encode() + b"\r\n")
 		conn.send(b"\r\n")
-		if(reply_parsed[1] != "/"):
-			conn.send(file.read().encode())
+		conn.send(file.read().encode())
 	except IOError:
 		print('Requested File Not Found')
 		conn.send(reply_parsed[2].encode() + b" 404 " + b"Not Found")
