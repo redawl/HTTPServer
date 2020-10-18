@@ -9,8 +9,18 @@ def get_file_type(file):
 		ret = "text/html; charset=UTF-8"
 	elif(extension == "ico"):
 		ret = "image/x-icon"
+	elif(extension == "css"):
+		ret = "text/css; charset=UTF-8"
+	else:
+		ret = "text; charset=UTF-8"
 
 	return ret
+
+def check_if_forbidden(file):
+	updir = len(file.split(".."))
+	downdir = len(file.split("/"))
+	if(downdir / updir < 2):
+		raise ValueError()
 
 #This function will be run for every client that connects
 def for_each_client(sock, conn, web_directory):
@@ -19,13 +29,9 @@ def for_each_client(sock, conn, web_directory):
 	reply_raw = str(reply)[2:-1]
 	requests = reply_raw.split("\\r\\n")
 	reply_parsed = requests[0].split(" ")
-	print('METHOD: ' + reply_parsed[0] + '\n')
-	print('RESOURCE: ' + reply_parsed[1] + '\n')
-	print('VERSION: ' + reply_parsed[2] + '\n')
-	for i in range(len(requests) - 1):
-		print(requests[i + 1])
-
+	print("COMMAND: " + reply_parsed[0] + '\n')
 	try:
+		check_if_forbidden(reply_parsed[1])
 		if(reply_parsed[1] != "/"):
 			print(web_directory + reply_parsed[1])
 		else:
@@ -38,10 +44,13 @@ def for_each_client(sock, conn, web_directory):
 		conn.send(b"\r\n")
 		conn.send(file.read().encode())
 	except IOError:
-		print('Requested File Not Found')
 		conn.send(reply_parsed[2].encode() + b" 404 " + b"Not Found")
 		conn.send(b"\r\n")
 		conn.send(b"Sorry we don't have that file!")
+	except ValueError:
+		conn.send(reply_parsed[2].encode() + b" 403 " + b"Forbidden")
+		conn.send(b"\r\n")
+		conn.send(reply_parsed[1].encode() + b" is forbidden!")
 
 	conn.close()
 	print('Client Disconnected')
