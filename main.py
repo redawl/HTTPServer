@@ -2,6 +2,7 @@
 import socket
 import threading
 
+#This function gets the correct file type, and returns the Content-Type to be sent to the client
 def get_file_type(file):
 	ret = "text"
 	extension = file.split(".")[1]
@@ -16,6 +17,7 @@ def get_file_type(file):
 
 	return ret
 
+#This function makes sure the request stays in the bounds of the root directory
 def check_if_forbidden(file):
 	updir = len(file.split(".."))
 	downdir = len(file.split("/"))
@@ -29,40 +31,49 @@ def for_each_client(sock, conn, web_directory):
 	reply_raw = str(reply)[2:-1]
 	requests = reply_raw.split("\\r\\n")
 	reply_parsed = requests[0].split(" ")
-	print("COMMAND: " + reply_parsed[0] + '\n')
+	METHOD = reply_parsed[0]
+	RESOURCE = reply_parsed[1]
+	HTTP_VERSION = reply_parsed[2]
+	print("METHOD: " + METHOD + '\n')
 	try:
-		check_if_forbidden(reply_parsed[1])
-		if(reply_parsed[1] != "/"):
-			print(web_directory + reply_parsed[1])
+		check_if_forbidden(RESOURCE)
+		if(RESOURCE != "/"):
+			print(web_directory + RESOURCE)
 		else:
-			reply_parsed[1] = "/index.html"
+			RESOURCE = "/index.html"
 
-		file = open(web_directory + reply_parsed[1], "r")
-		extension = get_file_type(reply_parsed[1])
-		conn.send(reply_parsed[2].encode() + b" 200 " + b"OK\r\n")
+		file = open(web_directory + RESOURCE, "r")
+		extension = get_file_type(RESOURCE)
+		conn.send(HTTP_VERSION.encode() + b" 200 " + b"OK\r\n")
 		conn.send(b"Content-Type: " + extension.encode() + b"\r\n")
 		conn.send(b"\r\n")
 		conn.send(file.read().encode())
 	except IOError:
-		conn.send(reply_parsed[2].encode() + b" 404 " + b"Not Found")
+		conn.send(HTTP_VERSION.encode() + b" 404 " + b"Not Found")
 		conn.send(b"\r\n")
 		conn.send(b"Sorry we don't have that file!")
 	except ValueError:
-		conn.send(reply_parsed[2].encode() + b" 403 " + b"Forbidden")
+		conn.send(HTTP_VERSION.encode() + b" 403 " + b"Forbidden")
 		conn.send(b"\r\n")
-		conn.send(reply_parsed[1].encode() + b" is forbidden!")
+		conn.send(RESOURCE.encode() + b" is forbidden!")
 
 	conn.close()
 	print('Client Disconnected')
 
+#This function parses the config file for use in the program. Returns (host, port, web directory)
+def read_config():
+	cfgFile = open("config.txt", "r")
+	cfg = cfgFile.read()
+	cfg_parsed = cfg.split("\n")
+	return (cfg_parsed[0].split(" ")[1], cfg_parsed[1].split(" ")[1], cfg_parsed[2].split(" ")[1])
+
+## MAIN FUNCTION ##
+
 #Read Configuration from config.txt
-cfgFile = open("config.txt", "r")
-cfg = cfgFile.read()
-cfg_parsed = cfg.split("\n")
-print(cfg_parsed)
-host = cfg_parsed[0].split(" ")[1]
-port = cfg_parsed[1].split(" ")[1]
-web_directory = cfg_parsed[2].split(" ")[1]
+cfg = read_config()
+host = cfg[0]
+port = cfg[1]
+web_directory = cfg[2]
 
 #This block of code handles the new clients and passes control to for_each_client()
 sock = socket.create_server((host, int(port)))
