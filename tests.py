@@ -11,5 +11,5 @@ def test_outside_dir(client):
 
 def this_file_doesnt_exist(client)
 client = socket.socket()
-client.connect(("192.168.0.16", 6789))
+client.connect(("HOST", 6789))
 test_outside_dir(client)
