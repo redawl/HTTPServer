@@ -13,4 +13,4 @@ host: (your local IPv4 address)
 port: (number of your choice)
 web_directory: (where you keep your server files)
 ```
-After that,  run main.py using your python interpreter, and you should be good to go!
+After that,  run server.py using your python interpreter, and you should be good to go!
