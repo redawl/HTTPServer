@@ -55,3 +55,11 @@ def for_each_client(sock, conn, web_directory):
 
 	conn.close()
 	print('Client Disconnected')
+
+
+#This function parses the config file for use in the program. Returns (host, port, web directory)
+def read_config():
+	cfgFile = open("config.txt", "r")
+	cfg = cfgFile.read()
+	cfg_parsed = cfg.split("\n")
+	return (cfg_parsed[0].split(" ")[1], cfg_parsed[1].split(" ")[1], cfg_parsed[2].split(" ")[1])
