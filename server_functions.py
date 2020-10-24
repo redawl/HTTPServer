@@ -10,6 +10,8 @@ def get_file_type(file):
 		ret = "text/css; charset=UTF-8"
 	elif(extension == "jpg"):
 		ret = "image/jpeg"
+	elif(extension == "pdf"):
+		ret = "application/pdf"
 	else:
 		ret = "text; charset=UTF-8"
 

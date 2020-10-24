@@ -13,6 +13,7 @@ web_directory = cfg[2]
 
 #This block of code handles the new clients and passes control to for_each_client()
 sock = socket.create_server((host, int(port)))
+print("Creating Server on " + host + ":" + port + '\r\n')
 while(1):
 	sock.listen(10)
 	conn = sock.accept()[0]
