@@ -2,16 +2,19 @@
 import socket
 import threading
 from server_functions import *
+from configparser import ConfigParser
 
 ## MAIN FUNCTION ##
 if __name__ == "__main__":
-    # Read Configuration from config.txt
-    cfg = read_config()
-    host = cfg[0]
-    port = cfg[1]
-    web_directory = cfg[2]
+    # Read Configuration from config.ini
+    cfg = ConfigParser()
+    cfg.read('config.ini')
+    host = cfg.get('server', 'host')
+    port = cfg.get('server', 'port')
+    web_directory = cfg.get('server', 'web_directory')
 
     # This block of code handles the new clients and passes control to for_each_client()
+    print(host + ":" + port)
     sock = socket.create_server((host, int(port)))
     print("Creating Server on " + host + ":" + port + "\r\n")
     while True:
