@@ -22,8 +22,17 @@ def get_file_type(file):
 
 # This function makes sure the request stays in the bounds of the web directory
 def check_if_forbidden(file):
-    updir = file.count("..") + 1
-    downdir = file.count("/") + 1
+    updir = len(file.split(".."))
+    sanitized = ""
+    for i in range(len(file) - 1):
+        if(file[i] == '/'):
+            if(file[i + 1] != '/'):
+                sanitized += file[i]
+        else:
+            sanitized += file[i]
+    sanitized += file[len(file) - 1]
+    print(sanitized)
+    downdir = len(sanitized.split("/"))
     if updir == 0 or downdir / updir < 2:
         raise ValueError(403)
 
@@ -67,8 +76,7 @@ def for_each_client(sock, conn, web_directory):
     reply_parsed = requests[0].split(" ")
 
     if len(reply_parsed) < 3:
-    	conn.send(b"HTTP/1.1" + b" 400 Bad Request")
-    	conn.send(b"\r\n")
+    	conn.send(b"HTTP/1.1" + b" 400 Bad Request\r\n")
     	conn.send(b"Unreadable Request!\r\n")
     	conn.close()
     	return None
@@ -101,26 +109,21 @@ def for_each_client(sock, conn, web_directory):
         conn.send(file.read())
         file.close()
     except IOError:
-        conn.send(http_version.encode() + b" 404 Not Found")
-        conn.send(b"\r\n")
+        conn.send(http_version.encode() + b" 404 Not Found\r\n")
         conn.send(b"Sorry we don't have that file!")
     except ValueError as error:
         errorCode = int(str(error))
         if errorCode == 403:
-            conn.send(http_version.encode() + b" 403 Forbidden")
-            conn.send(b"\r\n")
+            conn.send(http_version.encode() + b" 403 Forbidden\r\n")
             conn.send(resource.encode() + b" is forbidden!")
         elif errorCode == 400:
-            conn.send(http_version.encode() + b" 400 Bad Request")
-            conn.send(b"\r\n")
+            conn.send(http_version.encode() + b" 400 Bad Request\r\n")
             conn.send(method.encode() + b" is not a valid method!")
         elif errorCode == 405:
-            conn.send(http_version.encode() + b" 405 Method Not Allowed")
-            conn.send(b"\r\n")
+            conn.send(http_version.encode() + b" 405 Method Not Allowed\r\n")
             conn.send(method.encode() + b" is not supported by this server!")
         elif errorCode == 505:
-            conn.send(http_version.encode() + b" 505 HTTP Version Not Supported")
-            conn.send(b"\r\n")
+            conn.send(http_version.encode() + b" 505 HTTP Version Not Supported\r\n")
             conn.send(http_version.encode() + b" is not a valid HTTP version! Try HTTP/1.1")
     conn.close()
     print("Client Disconnected")
