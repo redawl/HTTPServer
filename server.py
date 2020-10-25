@@ -14,7 +14,6 @@ if __name__ == "__main__":
     web_directory = cfg.get('server', 'web_directory')
 
     # This block of code handles the new clients and passes control to for_each_client()
-    print(host + ":" + port)
     sock = socket.create_server((host, int(port)))
     print("Creating Server on " + host + ":" + port + "\r\n")
     while True:
