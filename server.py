@@ -8,10 +8,10 @@ from configparser import ConfigParser
 if __name__ == "__main__":
     # Read Configuration from config.ini
     cfg = ConfigParser()
-    cfg.read('config.ini')
-    host = cfg.get('server', 'host')
-    port = cfg.get('server', 'port')
-    web_directory = cfg.get('server', 'web_directory')
+    cfg.read("config.ini")
+    host = cfg.get("server", "host")
+    port = cfg.get("server", "port")
+    web_directory = cfg.get("server", "web_directory")
 
     # This block of code handles the new clients and passes control to for_each_client()
     sock = socket.create_server((host, int(port)))
