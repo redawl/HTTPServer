@@ -7,10 +7,10 @@ Clone this repo:
 ```
 git clone https://github.com/redawl/HTTPServer.git
 ```
-Create config.txt in the projects root directory, and add these three lines:
+Create config.ini in the projects root directory, and add these three lines:
 ```
-host: (your local IPv4 address)
-port: (number of your choice)
-web_directory: (where you keep your server files)
+host =  (your local IPv4 address)
+port =  (number of your choice)
+web_directory =  (where you keep your server files)
 ```
 After that,  run server.py using your python interpreter, and you should be good to go!
