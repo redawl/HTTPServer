@@ -58,20 +58,20 @@ def for_each_client(sock, conn, web_directory):
         conn.close()
         return None
     elif len(reply_raw) > 4096:
-        conn.send(b"HTTP/1.1" + b" 413 Payload Too Large")
-        conn.send(b"\r\n")
-        conn.send(b"Request was too large for server to handle!")
-        conn.close()
-        return None
+    	conn.send(b"HTTP/1.1" + b" 413 Payload Too Large")
+    	conn.send(b"\r\n")
+    	conn.send(b"Request was too large for server to handle!")
+    	conn.close()
+    	return None
     requests = reply_raw.split("\\r\\n")
     reply_parsed = requests[0].split(" ")
 
     if len(reply_parsed) < 3:
-        conn.send(b"HTTP/1.1" + b" 400 Bad Request")
-        conn.send(b"\r\n")
-        conn.send(b"Unreadable Request!\r\n")
-        conn.close()
-        return None
+    	conn.send(b"HTTP/1.1" + b" 400 Bad Request")
+    	conn.send(b"\r\n")
+    	conn.send(b"Unreadable Request!\r\n")
+    	conn.close()
+    	return None
     method = reply_parsed[0]
     resource = reply_parsed[1]
     http_version = reply_parsed[2]
@@ -85,29 +85,21 @@ def for_each_client(sock, conn, web_directory):
         + "\n"
     )
     try:
-        verify_method(
-            method
-        )  # Thows ValueError(405) if unsupported method, throws ValueError(400) if unknown
-        check_if_forbidden(
-            resource
-        )  # Throws ValueError(403) if resorce path is outside of web_directory
-        verify_http_version(
-            http_version
-        )  # Throws ValueError(505) if unsupported HTTP version
+        verify_method(method)  # Thows ValueError(405) if unsupported method, throws ValueError(400) if unknown
+        check_if_forbidden(resource)  # Throws ValueError(403) if resorce path is outside of web_directory
+        verify_http_version(http_version)  # Throws ValueError(505) if unsupported HTTP version
         if resource != "/":
             print(web_directory + resource)
         else:
             resource = "/index.html"
 
-        with open(
-            web_directory + resource, "rb"
-        ) as file:  # Throws IOError if file doesn't exist
-            file_contents = file.read()
+        file = open(web_directory + resource, "rb")  # Throws IOError if file doesn't exist
         extension = get_file_type(resource)
         conn.send(http_version.encode() + b" 200 OK\r\n")
         conn.send(b"Content-Type: " + extension.encode() + b"\r\n")
         conn.send(b"\r\n")
-        conn.send(file_contents)
+        conn.send(file.read())
+        file.close()
     except IOError:
         conn.send(http_version.encode() + b" 404 Not Found")
         conn.send(b"\r\n")
@@ -129,8 +121,6 @@ def for_each_client(sock, conn, web_directory):
         elif errorCode == 505:
             conn.send(http_version.encode() + b" 505 HTTP Version Not Supported")
             conn.send(b"\r\n")
-            conn.send(
-                http_version.encode() + b" is not a valid HTTP version! Try HTTP/1.1"
-            )
+            conn.send(http_version.encode() + b" is not a valid HTTP version! Try HTTP/1.1")
     conn.close()
     print("Client Disconnected")
