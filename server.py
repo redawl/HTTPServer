@@ -20,7 +20,13 @@ if __name__ == "__main__":
         sock.listen(10)
         conn = sock.accept()[0]
         print("Client Connected")
-        new_thread = threading.Thread(
-            None, for_each_client, None, (sock, conn, web_directory)
-        )
-        new_thread.start()
+        if(threading.active_count() <= 500):
+            new_thread = threading.Thread(
+                None, for_each_client, None, (sock, conn, web_directory)
+            )
+            new_thread.start()            
+        else:
+            conn.send(b"HTTP/1.1 503 Service Unavailable\r\n")
+            conn.send(b"Too many requests ATM. Please try again later!")
+            conn.close()
+            print("Client Disconnected")
