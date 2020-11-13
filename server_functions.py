@@ -111,11 +111,9 @@ def for_each_client(sock, conn, web_directory, cfg):
         elif errorCode == 400:
             conn.send(http_version.encode() + b" 400 Bad Request\r\n")
             conn.send(method.encode() + b" is not a valid method!")
-            print(400)
         elif errorCode == 405:
             conn.send(http_version.encode() + b" 405 Method Not Allowed\r\n")
             conn.send(method.encode() + b" is not supported by this server!")
-            print(405)
         elif errorCode == 505:
             conn.send(http_version.encode() + b" 505 HTTP Version Not Supported\r\n")
             conn.send(
