@@ -1,23 +1,14 @@
 from os.path import splitext
 
 # This function gets the correct file type, and returns the Content-Type to be sent to the client
-def get_file_type(file):
+def get_file_type(file, cfg):
     ret = "text"
     extension = splitext(file)[1]
-    if extension == ".html":
-        ret = "text/html"
-    elif extension == ".ico":
-        ret = "image/x-icon"
-    elif extension == ".css":
-        ret = "text/css"
-    elif extension == ".jpg":
-        ret = "image/jpeg"
-    elif extension == ".pdf":
-        ret = "application/pdf"
-    else:
-        ret = "text"
-
-    return ret
+    
+    try:
+        return cfg.get("file_types", extension)
+    except:
+        return "text"
 
 
 # This function makes sure the request stays in the bounds of the web directory
@@ -36,20 +27,14 @@ def check_if_forbidden(file):
         raise ValueError(403)
 
 
-def verify_method(method):
-    valid = {
-        "GET": True,
-        "HEAD": False,
-        "POST": False,
-        "PUT": False,
-        "DELETE": False,
-        "CONNECT": False,
-        "OPTIONS": False,
-        "TRACE": False,
-    }
-    if (method in valid) == False:
+def verify_method(method, cfg):
+    is_supported = True
+    try:
+        is_supported = cfg.getboolean("methods", method) 
+    except:
         raise ValueError(400)
-    elif valid[method] == False:
+
+    if is_supported == False:
         raise ValueError(405)
 
 
@@ -59,7 +44,7 @@ def verify_http_version(http_version):
 
 
 # This function will be run for every client that connects
-def for_each_client(sock, conn, web_directory):
+def for_each_client(sock, conn, web_directory, cfg):
     reply_raw = str(conn.recv(8192))[2:-1]
     if reply_raw == "":  # checks if client disconnected without sending request
         print("Client Disconnected")
@@ -93,7 +78,8 @@ def for_each_client(sock, conn, web_directory):
     )
     try:
         verify_method(
-            method
+            method,
+            cfg
         )  # Thows ValueError(405) if unsupported method, throws ValueError(400) if unknown
         check_if_forbidden(
             resource
@@ -108,7 +94,7 @@ def for_each_client(sock, conn, web_directory):
 
         with open(web_directory + resource, "rb") as file:
             file_contents = file.read()  # Throws IOError if file doesn't exist
-        extension = get_file_type(resource)
+        extension = get_file_type(resource, cfg)
         conn.send(http_version.encode() + b" 200 OK\r\n")
         conn.send(b"Content-Type: " + extension.encode() + b"\r\n")
         conn.send(b"\r\n")
@@ -125,9 +111,11 @@ def for_each_client(sock, conn, web_directory):
         elif errorCode == 400:
             conn.send(http_version.encode() + b" 400 Bad Request\r\n")
             conn.send(method.encode() + b" is not a valid method!")
+            print(400)
         elif errorCode == 405:
             conn.send(http_version.encode() + b" 405 Method Not Allowed\r\n")
             conn.send(method.encode() + b" is not supported by this server!")
+            print(405)
         elif errorCode == 505:
             conn.send(http_version.encode() + b" 505 HTTP Version Not Supported\r\n")
             conn.send(
