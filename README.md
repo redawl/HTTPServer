@@ -7,7 +7,7 @@ Clone this repo:
 ```
 git clone https://github.com/redawl/HTTPServer.git
 ```
-Create config.ini in the projects root directory, and add these three lines:
+Edit these three lines in config.ini in the projects root directory.
 ```
 host =  (your local IPv4 address)
 port =  (number of your choice)
