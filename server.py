@@ -3,6 +3,7 @@ import socket
 import threading
 from server_functions import *
 from configparser import ConfigParser
+from datetime import datetime
 
 ## MAIN FUNCTION ##
 if __name__ == "__main__":
@@ -19,10 +20,10 @@ if __name__ == "__main__":
     while True:
         sock.listen(10)
         conn = sock.accept()[0]
-        print("Client Connected")
+        print("Client Connected [", datetime.now(), "]")
         if threading.active_count() <= 500:
             new_thread = threading.Thread(
-                None, for_each_client, None, (sock, conn, web_directory)
+                None, for_each_client, None, (sock, conn, web_directory, cfg)
             )
             new_thread.start()
         else:
