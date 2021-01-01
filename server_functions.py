@@ -42,6 +42,15 @@ def verify_http_version(http_version):
     if http_version != "HTTP/1.1":
         raise ValueError(505)
 
+def GET(web_directory, resource, cfg, conn, http_version):
+	with open(web_directory + resource, "rb") as file:
+		file_contents = file.read()  # Throws IOError if file doesn't exist
+	extension = get_file_type(resource, cfg)
+	conn.send(http_version.encode() + b" 200 OK\r\n")
+	conn.send(b"Content-Type: " + extension.encode() + b"\r\n")
+	conn.send(b"\r\n")
+	conn.send(file_contents)
+	file.close()
 
 # This function will be run for every client that connects
 def for_each_client(sock, conn, web_directory, cfg):
@@ -92,14 +101,9 @@ def for_each_client(sock, conn, web_directory, cfg):
         else:
             resource = "/index.html"
 
-        with open(web_directory + resource, "rb") as file:
-            file_contents = file.read()  # Throws IOError if file doesn't exist
-        extension = get_file_type(resource, cfg)
-        conn.send(http_version.encode() + b" 200 OK\r\n")
-        conn.send(b"Content-Type: " + extension.encode() + b"\r\n")
-        conn.send(b"\r\n")
-        conn.send(file_contents)
-        file.close()
+        if method == "GET":
+        	GET(web_directory, resource, cfg, conn, http_version)
+
     except IOError:
         conn.send(http_version.encode() + b" 404 Not Found\r\n")
         conn.send(b"Sorry we don't have that file!")
