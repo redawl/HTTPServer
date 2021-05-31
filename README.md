@@ -1,6 +1,6 @@
 # HTTPServer
 
-This basic server is my attempt at the http server project run by TPH, which can be found [here](https://theprogrammershangout.com/resources/projects/http-project-guide/).
+This basic server is my attempt at the http server project run by TPH, which can be found [here](https://theprogrammershangout.com/resources/projects/http-project-guide/intro.md).
 
 ### Installation:
 Clone this repo:
