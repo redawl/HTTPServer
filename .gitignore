@@ -1,4 +1,4 @@
-config.ini
-www
-__pycache__
-.pypy_cache
+./config.ini
+./www
+./__pycache__
+./.pypy_cache

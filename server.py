@@ -1,9 +1,9 @@
 # includes
 import socket
 import threading
-from server_functions import *
 from configparser import ConfigParser
 from datetime import datetime
+from server_functions import for_each_client
 
 ## MAIN FUNCTION ##
 if __name__ == "__main__":
@@ -23,7 +23,7 @@ if __name__ == "__main__":
         print("Client Connected [", datetime.now(), "]")
         if threading.active_count() <= 500:
             new_thread = threading.Thread(
-                None, for_each_client, None, (sock, conn, web_directory, cfg)
+                None, for_each_client, None, (conn, web_directory, cfg)
             )
             new_thread.start()
         else:
